@@ -1,17 +1,24 @@
-const fillHeight = 25;
-const fillWidth = 25;
+const fillHeight = 10;
+const fillWidth = 10;
 let canvas = document.getElementById("canvasId");
 let ctx = canvas.getContext("2d");
+const canvasWidth = canvas.width;
+const canvasHeight = canvas.height;
 
-let xPos, yPos;
+let snakeRunning;
+let xPos = 0;
+let yPos = 250;
 let snakeBody = [];
 
 let turnDirection;
 
 let timer = setInterval(function () {
-    fillSnake();
-    moveSnake();
+    if(snakeRunning) {
+        fillSnake();
+        moveSnake();
+    }
 }, 1000);
+
 
 function leftTurn(){
     if(turnDirection == "right"){
@@ -53,21 +60,22 @@ function fillSnake(){
 function startStop(){
     let startStopBtn = document.getElementById("startStopButton");
     if (startStopBtn.value == "Start"){
+        snakeRunning = true;
         startStopBtn.value = "Stop";
         startMovement();
     }
     else if (startStopBtn.value == "Stop"){
+        snakeRunning = false;
         startStopBtn.value = "Start";
         stopMovement();
     }
-
 }
 
 function startMovement(){
     if(snakeBody.length < 1){
         turnDirection = "right";
         xPos = 0;
-        yPos = 250;
+        yPos = canvasHeight/2;
         let snakeBodyElement = {x: xPos, y: yPos}
         snakeBody.push(snakeBodyElement);
     }
@@ -81,35 +89,62 @@ function startMovement(){
 
 function moveSnake() {
     if(turnDirection == "left"){
-        xPos = xPos - 25;
+        xPos = xPos - 10;
         yPos = yPos;
     }
     else if(turnDirection == "right"){
-        xPos = xPos + 25;
+        xPos = xPos + 10;
         yPos = yPos;
     }
     else if(turnDirection == "down"){
         xPos = xPos;
-        yPos = yPos + 25;
+        yPos = yPos + 10;
     }
     else if(turnDirection == "up"){
         xPos = xPos;
-        yPos = yPos - 25;
+        yPos = yPos - 10;
     }
 
     let snakeBodyElement = {x: xPos, y: yPos}
-    if (xPos >= 0 && yPos >= 0) {
+    if (goodSnakeElement(snakeBodyElement)) {
         snakeBody.push(snakeBodyElement);
     }
-    else if(snakeBody.includes(snakeBodyElement)){
-        //game over function
-    }
     else {
-        stopMovement();
+        gameOver();
     }
 }
 
 function stopMovement() {
     clearInterval(timer);
+}
+
+function gameOver(){
+    snakeRunning = false;
+
+    let startStopBtn = document.getElementById("startStopButton");
+    startStopBtn.value = "Game Over!"
+}
+
+function goodSnakeElement(givenSnakeElement){
+    console.log(snakeBody);
+    console.log(givenSnakeElement);
+
+    if(givenSnakeElement.x < 0 || givenSnakeElement.y < 0 || givenSnakeElement.x > canvasWidth || givenSnakeElement.y > canvasHeight){
+        return false;
+    }
+
+    if(snakeContains(givenSnakeElement)){
+        return false;
+    }
+
+    return true;
+}
+
+function snakeContains(givenElement){
+    for(let i = 0; i < snakeBody.length; ++i){
+        if(JSON.stringify(snakeBody[i]) === JSON.stringify(givenElement))
+            return true;
+    }
+    return false;
 }
 
